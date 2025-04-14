@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ClimateTrack Pro</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <main class="main-container">
+    <div class="weather-background" id="weather-bg"></div>
+    <div class="container">
+        <!-- Header -->
+        <header>
+            <h1><i class="fas fa-cloud-sun"></i> ClimateTrack Pro</h1>
+            <div class="datetime" id="datetime"></div>
+            <div class="controls">
+                <div class="theme-toggle" id="dark">
+                    <label class="switch">
+                        <input type="checkbox" id="theme-switch" style="display: none;">
+                        <i class="fas fa-moon" id="dark"></i>
+                    </label>
+                </div>
+
+                 <!-- Alert Toggle Button -->
+                
+                <div id="authContainer">
+                    <a id="authButton" href="login.php">Login</a>
+                </div>
+                
+                
+                
+                <script>
+document.addEventListener("DOMContentLoaded", function () {
+    function updateAuthButton() {
+        let authContainer = document.getElementById("authContainer");
+        
+        fetch("check_session.php")
+            .then(response => response.json())
+            .then(data => {
+                if (data.loggedIn) {
+                    // Get initials from username
+                    const initials = data.username.split(' ').map(name => name[0]).join('').toUpperCase();
+                    
+                    authContainer.innerHTML = `
+                        <div class="dropdown">
+                            <button class="dropbtn">
+                                <div class="profile-circle">${initials}</div>
+                                <span class="username">${data.username}</span>
+                                <span class="dropdown-arrow">▼</span>
+                            </button>
+                            <div class="dropdown-content">
+                                <a href="profile.php">Profile</a>
+                                <a href="logout.php">Logout</a>
+                                <div class="alert-toggle">
+                                    <label class="switch">
+                                        <input type="checkbox" id="alert-switch">
+                                        <span class="slider"></span>
+                                    </label>
+                                    <span id="alert-text">Enable Alerts</span>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                } else {
+                    authContainer.innerHTML = `<a id="authButton" href="login.php">Login</a>`;
+                }
+            })
+            .catch(error => console.error("Error fetching session data:", error));
+    }
+
+    // Call function to update authentication button state
+    setTimeout(updateAuthButton, 500);
+});
+</script>
+
+                
+
+
+        </script>
+                    
+                    <style>
+                    /* Dropdown styling */
+                    /* Add these styles to your existing CSS */
+.dropbtn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 16px;
+    color: #333;
+    padding: 8px 12px;
+    border-radius: 50px;
+    transition: all 0.3s ease;
+}
+
+.dropbtn:hover {
+    background-color: #f1f1f1;
+}
+
+.profile-circle {
+    width: 32px;
+    height: 32px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    font-size: 14px;
+}
+
+.username {
+    max-width: 120px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.dropdown-arrow {
+    font-size: 12px;
+    margin-left: 4px;
+}
+
+/* Keep your existing dropdown styles */
+.dropdown {
+    position: relative;
+    display: inline-block;
+}
+
+.dropdown-content {
+    display: none;
+    position: absolute;
+    right: 0;
+    background-color: #f9f9f9;
+    min-width: 160px;
+    box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+    z-index: 1;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.dropdown-content a {
+    color: black;
+    padding: 12px 16px;
+    text-decoration: none;
+    display: block;
+}
+
+.dropdown-content a:hover {
+    background-color: #f1f1f1;
+}
+
+.dropdown:hover .dropdown-content {
+    display: block;
+}
+
+/* Alert toggle styles (keep existing) */
+.alert-toggle {
+    padding: 12px 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+    .dropdown-content .alert-toggle span {
+        margin-left: 10px;
+        font-size: 0.9rem;
+        color: #333; /* Adjust color to match your theme */
+    }
+    
+    /* Dark mode adjustments for the dropdown alert toggle */
+    body.dark-mode .dropdown-content .alert-toggle span {
+        color: #fff; /* Ensure text is visible in dark mode */
+    }
+                    </style>
+                    
+                    
+    
+                
+                
+
+            </div>
+        </header>
+
+        <!-- Search Bar -->
+        <div class="search-container">
+            <input type="text" id="location-input" placeholder="Enter city name...">
+            <button id="search-btn"><i class="fas fa-search-location"></i> Search</button>
+        </div>
+
+        <!-- Weather Display -->
+        <div class="weather-display">
+            <div class="current-weather">
+                <div class="main-info">
+                    <h2 id="city-name"><i class="fas fa-map-marker-alt"></i> Loading...</h2>
+                    <div class="newbox">
+                        <div class="temperature" id="temperature">--°C</div>
+                        <div class="weather-condition" id="weather-condition">--</div>
+                        <!-- Weather Condition Display -->
+                        <div class="weather-display">
+                            <!--<span id="weathercondition"></span>
+                            <img id="weather-icon" src="" class="weather-icon">-->
+                        </div>
+                    </div>
+                </div>
+
+                <div class="secondary-info">
+                    <div class="info-box"><i class="fas fa-tint iconhum"></i><br> Humidity: <span id="humidity">--%</span></div>
+                    <div class="info-box"><i class="fas fa-wind iconhum"></i><br> Wind: <span id="wind-speed">--m/s</span></div>
+                    <div class="info-box"><i class="fas fa-sun iconhum"></i><br>Sunrise & Sunset 
+                        <p>Sunrise: <span id="sunrise">--:--</span></p>
+                        <p>Sunset: <span id="sunset">--:--</span></p></div>
+                    <div class="info-box"><i class="fas fa-tachometer-alt iconhum"></i><br> Pressure: <span id="pressure">--hPa</span></div>
+                    
+                </div>
+            </div>
+
+            <!-- AQI Display -->
+            <div class="aqi-display">
+                <span id="aqi-value">--</span>
+                <span id="aqi-status" class="aqi-status"></span>
+                <span id="aqi-emoji" class="weather-emoji"></span>
+            </div>
+            <div class="for-sugbox">
+                <!-- Hourly Forecast -->
+                <div class="hourly-forecast-container">
+                    <h3><i class="fas fa-clock"></i> 24-Hour Forecast</h3>
+                    <div class="hourly-list" id="hourly-list"></div>
+                </div>
+
+                <!-- Suggestions Box -->
+                <div class="suggestions-box">
+                    <h3><i class="fas fa-lightbulb"></i> Suggestions</h3>
+                    <div class="suggestions-list" id="suggestions-list"></div>
+                </div>
+            </div>
+
+            <!-- 10-Day Forecast -->
+            <div class="weekly-forecast-container">
+                <h3><i class="fas fa-calendar-week"></i> 5-Day Forecast</h3>
+                <div class="weekly-list" id="weekly-list"></div>
+            </div>
+        </div>
+    </div>
+
+
+    
+
+
+
+    <!-- login and profile button -->
+    <script>
+    document.addEventListener("DOMContentLoaded", function () {
+        function updateAuthUI() {
+            fetch("check_session.php")
+                .then(response => response.json())
+                .then(data => {
+                    let authContainer = document.getElementById("authContainer");
+
+                    if (data.loggedIn) {
+                        authContainer.innerHTML = `
+                            <div class="dropdown">
+                                <button class="dropbtn">👤 ${data.username} ▼</button>
+                                <div class="dropdown-content">
+                                    <a href="profile.php">Profile</a>
+                                    <a href="logout.php">Logout</a>
+                                    <div class="alert-toggle">
+                                    <label class="switch">
+                                    <input type="checkbox" id="alert-switch">
+                                    <span class="slider"></span>
+                                    </label>
+                                    <span id="alert-text">Enable Alerts</span>
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+
+                        // Attach alert switch listener **after** rendering
+                        setTimeout(() => {
+                            if (typeof attachAlertListener === "function") {
+                                attachAlertListener();
+                            } else {
+                                console.error("⚠️ attachAlertListener function is missing in script.js!");
+                            }
+                        }, 500);
+                    } else {
+                        authContainer.innerHTML = `<a id="authButton" href="login.php">Login</a>`;
+                    }
+                })
+                .catch(error => console.error("Error fetching session data:", error));
+        }
+
+        // Ensure dropdown is updated **before script runs**
+        setTimeout(updateAuthUI, 500);
+    });
+</script>
+
+
+
+        
+    
+    </main>
+    <script src="script.js"></script>
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        if (typeof attachAlertListener === "function") {
+            attachAlertListener();
+        } else {
+            console.error("⚠️ attachAlertListener function is missing in script.js!");
+        }
+    });
+</script>
+
+</body>
+</html>
